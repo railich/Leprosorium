@@ -34,7 +34,12 @@ end
 
 post '/new' do
   @content = params[:content]
-  @message = "You typed #{@content}"
+
+  if @content.length == 0
+    @message = '<span style="color: red;">Type post text!</span>'
+  else
+    @message = "You typed #{@content}"
+  end
 
   erb :new
 end
