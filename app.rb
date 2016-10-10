@@ -21,10 +21,30 @@ configure do
     created_date DATE,
     content TEXT
   )'
+
+  @db.execute 'CREATE TABLE IF NOT EXISTS Comments
+  (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_date DATE,
+    content TEXT,
+    post_id INTEGER
+  )'
+end
+
+helpers do
+  def comments_count(post_id)
+    result = @db.execute '
+      SELECT COUNT(id) AS comment_count
+      FROM Comments
+      WHERE post_id = ?', [post_id]
+
+    result[0]['comment_count']
+  end
 end
 
 get '/' do
   @posts = @db.execute 'SELECT * FROM Posts ORDER BY id DESC'
+
   erb :index
 end
 
@@ -55,5 +75,16 @@ get '/post/:post_id' do
   results = @db.execute 'SELECT * FROM Posts WHERE id = ?', [post_id]
   @post = results[0]
 
-  erb :details
+  @comments = @db.execute 'SELECT * FROM Comments WHERE post_id = ?', [post_id]
+
+  erb :post_detail
+end
+
+post '/post/:post_id' do
+  post_id = params[:post_id]
+  comment = params[:content]
+  @db.execute 'INSERT INTO Comments (post_id, content, created_date)
+    VALUES (?, ?, datetime())', [post_id, comment]
+
+  redirect to "/post/#{post_id}"
 end
