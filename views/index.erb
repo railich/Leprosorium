@@ -1,0 +1,13 @@
+<h1>Latest posts:</h1>
+<%@posts.each do |post|%>
+  <p>
+    <%=post['content']%>
+    <br>
+    <br>
+    Added at: <%=post['created_date']%>
+    <br>
+    <br>
+    <a href="/post/<%=post['id']%>">Show</a>
+  </p>
+  <hr>
+<%end%>

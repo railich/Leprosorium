@@ -24,7 +24,8 @@ configure do
 end
 
 get '/' do
-	erb "Hello! <a href=\"https://github.com/bootstrap-ruby/sinatra-bootstrap\">Original</a> pattern has been modified for <a href=\"http://rubyschool.us/\">Ruby School</a>"
+  @posts = @db.execute 'SELECT * FROM Posts ORDER BY id DESC'
+  erb :index
 end
 
 get '/new' do
@@ -37,9 +38,22 @@ post '/new' do
 
   if @content.length == 0
     @message = '<span style="color: red;">Type post text!</span>'
-  else
-    @message = "You typed #{@content}"
+
+    return erb :new
   end
 
-  erb :new
+  @db.execute 'INSERT INTO Posts (content, created_date)
+    VALUES (?, datetime())' , [@content]
+
+    redirect to '/'
+end
+
+
+get '/post/:post_id' do
+  post_id = params[:post_id]
+
+  results = @db.execute 'SELECT * FROM Posts WHERE id = ?', [post_id]
+  @post = results[0]
+
+  erb :details
 end
